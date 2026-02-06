@@ -1,0 +1,19 @@
+CREATE OR REPLACE VIEW view_bal_freight_order AS
+SELECT 
+    fo.vrno AS freight_order_vrno,
+    fo.vrdate AS freight_order_date,
+    fo.qtylift AS freight_order_qty,
+    COALESCE(SUM(wb.netwt), 0) AS total_wb_netwt,
+    (fo.qtylift - COALESCE(SUM(wb.netwt), 0)) AS bal_freight_order_qty,
+    fo.truckno
+FROM 
+    view_freight_order fo
+LEFT JOIN 
+    view_gatetran_engine ge ON fo.vrno = ge.freight_order_vrno
+LEFT JOIN 
+    view_weighbridge_engine wb ON ge.vrno = wb.gate_vrno
+GROUP BY 
+    fo.vrno,
+    fo.vrdate,
+    fo.qtylift,
+    fo.truckno;
